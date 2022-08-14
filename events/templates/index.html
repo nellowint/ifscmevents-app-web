@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    
+    <!-- show-slides div -->
+
+    <div class="w3-content w3-display-container max-full-width">
+        <img class="show-slides w3-animate-opacity full-width" src="{% static 'images/img_la.jpg' %}">
+        <img class="show-slides w3-animate-opacity full-width" src="{% static 'images/img_chicago.jpg' %}">
+        <img class="show-slides w3-animate-opacity full-width" src="{% static 'images/img_ny.jpg' %}">
+        <button class="w3-button w3-black w3-display-left show-slides-buttons" onclick="plusDivs(-1)">&#10094;</button>
+        <button class="w3-button w3-black w3-display-right show-slides-buttons" onclick="plusDivs(+1)">&#10095;</button>
+    </div>
+
+    {% if nowEvents %}
+        <h2 class="w3-center">Eventos Ocorrendo</h2>
+        <hr>
+        <div class="w3-row-padding">
+            {% for event in nowEvents %}
+                {% include "eventIndex.html" %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if nextEvents %}
+        <h2 class="w3-center">Próximos Eventos</h2>
+        <hr>
+        <div class="w3-row-padding">
+            {% for event in nextEvents %}
+                {% include "eventIndex.html" %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Contato -->
+    <hr>
+    <div class="w3-container w3-light-grey">
+        <div class="w3-content form-size">
+            <form method="POST" class="w3-light-grey">
+                {% csrf_token %}
+                <h2 class="w3-center">Contato</h2>
+
+                <div class="w3-section">      
+                    <input class="w3-input" name="email" type="email" placeholder="Email" required>
+                </div>
+
+                <div class="w3-section">      
+                    <input class="w3-input" name="subject" type="text" placeholder="Assunto" required>
+                </div>
+
+                <div class="w3-section">      
+                    <textarea class="w3-input" name="message" type="text" placeholder="Mensagem" rows="10" cols="40" required></textarea>
+                </div>
+
+                <div class="w3-section w3-center">
+                    <div class="w3-half">
+                        <button type="reset" class="w3-button w3-grey w3-text-white almost-full">Limpar</button>
+                    </div>
+                    <div class="w3-half">
+                        <button class="w3-button w3-green w3-margin-bottom almost-full" type="submit">Enviar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <input id="url_search" type="hidden" data-url="{% url 'objectListJson'  %}">
+    <input type="hidden" id="url_detail" data-url="">
+{% endblock %}
+{% block js %}
+    <script src="{% static 'js/index.js' %}"></script>
+{% endblock %}

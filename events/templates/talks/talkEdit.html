@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <h2 class="w3-center">{{ edit|default:"Nova" }} Palestra</h2>
+    <hr class="w3-clear">
+    <div class="w3-container">
+        <div class="w3-content form-size">
+            <form method="POST" class="w3-white">
+                {% csrf_token %}
+
+                <div class="w3-section">
+                    <script type="text/javascript">
+                        var eventsList = [];
+                        {% for event in events %}
+                            eventsList.push(["{{ event.startDate|date:'c' }}","{{ event.finishDate|date:'c' }}"]);
+                        {% endfor %}
+                    </script>
+                    <select class="w3-select" id="id_event" name="event" required autofocus onchange="dateRange('id_event','id_date');">
+                        {% if not edit %}
+                            <option value="" disabled selected>Selecione um evento</option>
+                        {% endif %}
+                        {% for event in events %}
+                            {% if event.id == form.event.value %}
+                                <option value="{{ event.id }}" selected>
+                                    {{ event.name }}
+                                </option>
+                            {% else %}
+                                <option value="{{ event.id }}">
+                                    {{ event.name }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="w3-section">
+                    <label for="id_speakers">Palestrante(s)</label>
+                    <select class="w3-input" id="id_speakers" name="speakers" multiple="multiple" required onchange="selectSpeaker();">
+                        {% for speaker in speakers %}
+                            {% if speaker.id in form.speakers.value or user.speaker.id == speaker.id %}
+                                <option value="{{ speaker.id }}" selected
+                                    {% if user.speaker.id == speaker.id %}
+                                        id="speaker_id">
+                                    {% else %}
+                                        >
+                                    {% endif %}
+                                    {{ speaker.name }}
+                                </option>
+                            {% else %}
+                                <option value="{{ speaker.id }}">
+                                    {{ speaker.name }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="w3-section">
+                    <input class="w3-input" type="text" id="id_name" name="name" value="{{ form.name.value|default_if_none:'' }}" placeholder="Nome da Palestra" maxlength="300" required />
+                </div>
+
+                <div class="w3-section">
+                    <textarea class="w3-input" type="text" id="id_desc" name="desc" placeholder="Descrição" rows="10" cols="40" required>{{ form.desc.value|default_if_none:'' }}</textarea>
+                </div>
+
+                <div class="w3-section">
+                    <input class="w3-input" type="text" id="id_location" name="location" value="{{ form.location.value|default_if_none:'' }}" placeholder="Local" required maxlength="300" />
+                </div>
+
+                <div class="w3-section">
+                    <div class="w3-half">
+                        <label for="id_category">Tipo</label>
+                        <input class="w3-input" type="text" id="id_category" name="category" value="{{ form.category.value|default_if_none:'' }}" maxlength="300" required autofocus />
+                    </div>
+                    <div class="w3-half">
+                        <label for="id_maxPeople">Vagas</label>
+                        <input class="w3-input" type="number" id="id_maxPeople" name="maxPeople" value="{{ form.maxPeople.value|default_if_none:'' }}" min="0" required />
+                    </div>
+                </div>
+
+                <div class="w3-section">
+                    <div class="w3-third">
+                        <label for="id_date">Data</label>
+                        <input class="w3-input" type="date" id="id_date" name="date" value="{{ form.date.value|date:'c'|default_if_none:'' }}" required min="{% now 'Y-m-d' %}" onchange="timeFunction('id_date','id_startTime');" />
+                    </div>
+                    <div class="w3-third">
+                        <label for="id_startTime">Horário Inicial:</label>
+                        <input class="w3-input" type="time" id="id_startTime" name="startTime" value="{{ form.startTime.value|default_if_none:'' }}" min="{% now 'H:i' %}" required onchange="dateTimeFunction('id_startTime','id_finishTime');" />
+                    </div>
+                    <div class="w3-third">
+                        <label for="id_finishTime">Horário Final:</label>
+                        <input class="w3-input" type="time" id="id_finishTime" name="finishTime" value="{{ form.finishTime.value|default_if_none:'' }}" min="{% now 'H:i' %}" required />
+                    </div>
+                </div>
+
+                <p class="w3-text-white">line-break</p>
+
+                <div class="w3-section w3-center">
+                    {% if edit %}
+                        <div class="w3-half">
+                            <a href="{% url 'eventDetail' pk=form.event.value %}" class="w3-button w3-light-grey almost-full">Cancelar</a>
+                        </div>
+                        <div class="w3-half">
+                            <button class="w3-button w3-green w3-margin-bottom almost-full" type="submit">Salvar</button>
+                        </div>
+                    {% else %}
+                        <div class="w3-half">
+                            <button type="reset" class="w3-button w3-light-grey almost-full">Limpar</button>
+                        </div>
+                        <div class="w3-half">
+                            <button class="w3-button w3-green w3-margin-bottom almost-full" type="submit">Salvar</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+    <input id="url_search" type="hidden" data-url="{% url 'talkListJson'  %}">
+    <input type="hidden" id="url_detail" data-url="{% url 'talkDetail' pk=0 %}">
+{% endblock %}
+{% block js %}
+    <script src="{% static 'js/util.js' %}"></script>
+{% endblock %}

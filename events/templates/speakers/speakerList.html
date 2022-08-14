@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <h2 class="w3-center">Palestrantes</h2>
+    <hr class="w3-clear">
+    <div class="w3-container w3-center">
+        {% for speaker in speakers %}
+            {% if forloop.counter|add:3|divisibleby:4 %}
+                <div class="w3-row">
+            {% endif %}
+                {% if speaker.approved or user.is_superuser %}               
+                    <div class="w3-quarter">
+                        <a href="{% url 'speakerDetail' pk=speaker.pk %}">
+                            <div class="w3-tooltip">
+                            {% if speaker.image.url != null %}
+                                <img src="{{ speaker.image.url }}" alt="Boss" class="img-speakers w3-circle w3-hover-opacity">
+                            {% else %}
+                                <img src="{% static 'images/speaker.png' %}" alt="Boss" class="img-speakers w3-circle w3-hover-opacity">
+                            {% endif %}
+                                <h6 class="link-decoration">{{ speaker.name }}</h6>
+                                <span class="w3-text w3-tag w3-round-xlarge w3-animate-opacity">
+                                    Email: {{ speaker.email }}<br>
+                                    Formação: {{ speaker.formation }}  
+                                </span>
+                            </div>
+                        </a>
+                    </div>
+                {% endif%}
+            {% if forloop.counter|divisibleby:4 or forloop.last %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <input id="url_search" type="hidden" data-url="{% url 'speakerListJson' %}">
+    <input type="hidden" id="url_detail" data-url="{% url 'speakerDetail' pk=0 %}">
+{% endblock %}

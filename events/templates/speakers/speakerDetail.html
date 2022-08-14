@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <h2 class="w3-center">Biografia</h2>
+    <hr class="w3-clear">
+    <div class="container">
+        <div class="w3-row">
+            <div class="w3-quarter">
+                <div class="w3-card-4 w3-margin-left w3-margin-right w3-margin-bottom">
+                    {% if speaker.image.url != null %}
+                        <img src="{{ speaker.image.url }}" alt="{{ speaker.name }}" title="{{ speaker.name }}" class="full-width">
+                    {% else %}
+                        <img src="{% static 'images/speaker.png' %}" alt="{{ speaker.name }}" title="{{ speaker.name }}" class="full-width">
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="w3-twothird">
+                <div class="w3-container w3-card-4 w3-margin-left w3-margin-right">
+                    <div class="w3-margin-top">
+                        {% if speaker.id == user.id %}
+                            <a href="{% url 'speakerEdit' pk=speaker.pk %}" class="w3-button w3-right"><i class="fa fa-pencil" title="Editar"></i></a>
+                        {% endif %}
+
+                        {% if user.is_superuser and speaker.approved == False %}
+                            <span id="vt_remove" class="w3-button w3-right"><i class="fa fa-trash" title="Remover"></i></span>
+                            <div id="vt_remove_dialog" class="w3-modal">
+                                <div class="w3-modal-content w3-animate-zoom modal-dialog">
+                                    <header class="w3-container"> 
+                                        <span class="w3-button w3-display-topright vt_hide_dialog">&times;</span>
+                                    </header>
+                                    <div class="w3-container">
+                                        <p>Tem certeza que deseja excluir o palestrante "{{ speaker.name }}"?</p>
+                                    </div>
+                                    <footer class="w3-container w3-padding-16">
+                                        <button class="w3-button w3-green w3-right vt_hide_dialog">Cancelar</button>
+                                        <a class="w3-button w3-right w3-margin-right w3-red" href="{% url 'speakerRemove' pk=speaker.pk %}" title="Remover">Remover</a>
+                                    </footer>
+                                </div>
+                            </div>
+                            
+                            <input id="url_approve" type="hidden" data-url="{% url 'speakerApprove' pk=speaker.pk %}">
+                            <span id="vt_approve" class="w3-button w3-right"><i class="fa fa-check" title="Aprovar"></i></span>
+                        {% endif%}
+                    </div>
+                    <h4>{{ speaker.name }}</h4>
+                    <hr class="w3-clear">
+                    <p>{{ speaker.email }}</p>    
+                    <hr class="w3-clear">
+                    <p>{{ speaker.formation }}</p>    
+                    <hr class="w3-clear">
+                    <p>{{ speaker.bio|linebreaksbr }}</p>                
+                </div>
+
+                <div class="w3-container w3-card-4 w3-margin">
+                    <h4>Palestras</h4>
+                    <hr class="w3-clear">
+                    {% for talk in speaker.speakers.all %}
+                        {% if user.is_authenticated or talk.approved %}
+                            <a class="link-decoration" href="{% url 'talkDetail' pk=talk.pk %}"><h5>{{ talk.name }} &nbsp;<i class="fa fa-external-link"></i></h5></a>
+                            <h6 class="w3-opacity">{{ talk.date }}</h6>
+                            {% if not talk.approved %}
+                                <h6 class="w3-opacity w3-text-red">Aguardando aprovação.</h6>
+                            {% endif %}
+                            {% if not forloop.last %}
+                                <hr class="w3-clear">
+                            {% endif %}
+                        {% endif %}
+                    {% empty %}
+                        <p>Não há palestras cadastradas para este palestrante.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <input id="url_search" type="hidden" data-url="{% url 'speakerListJson' %}">
+    <input type="hidden" id="url_detail" data-url="{% url 'speakerDetail' pk=0 %}">
+{% endblock %}
+{% block js %}
+    <script src="{% static 'js/approve.js' %}"></script>
+{% endblock %}
